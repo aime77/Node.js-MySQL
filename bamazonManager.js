@@ -1,8 +1,8 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
-const  genFunct=require("./bamazonCustomer.js")
-//const citiTable = require("cli-table");
+const getFunct = require("./bamazonCustomer.js");
+const citiTable = require("cli-table");
 //const bcrypt = require("bcrypt");
 
 const connection = mysql.createConnection({
@@ -100,27 +100,29 @@ function displayMenu() {
 }
 
 function viewProductsForSale() {
-    genFunc.displayItems();
+    getFunc.displayItems();
 }
 
 function viewLowInventory() {
-connection.query(`SELECT inventory_quantity, COUNT(*)c FROM products GROUP by product_name HAVING c<5`, (err, res)=>{
-    genFunc.tableDisplay();
-})
+    connection.query(`SELECT inventory_quantity, COUNT(*)c FROM products GROUP by product_name HAVING c<5`, (err, res) => {
+        getFunc.errorF(err);
+        getFunc.tableDisplay();
+    })
 }
 
 function addToInventory(itemID, newInventoryID) {
-    connection.query("UPDATE ?? SET ??=+?? WHERE ?", ['products', stock_quantity, newInventoryID, {item_id:itemID}],
-(err, res)=>{
-    console.log(`Succesful update at row ${connection.affectedRow}`)
-}
-)
-
+    connection.query("UPDATE products SET ??=+?? WHERE ?", ['stock_quantity', newInventoryID, { item_id: itemID }],
+        (err, res) => {
+            getFunc.errorF(err);
+            console.log(`Succesful update at row ${connection.affectedRow}`)
+        }
+    )
 }
 
 function addNewProduct(productName, productDept, productPrice) {
-    connection.query('INSERT INTO ?? SET ?', ['products', { product_name: productName, department_name:productDept, price: productPrice }],
+    connection.query('INSERT INTO ?? SET ?', ['products', { product_name: productName, department_name: productDept, price: productPrice }],
         (err, res) => {
+            getFunc.errorF(err);
             console.log(`Successful insertion at row ${connection.affectedRow}`);
         })
 }
