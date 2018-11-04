@@ -1,7 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-const chalk = require("chalk");
-const Table = require("cli-table");
+
 //const bcrypt = require("bcrypt");
 //require('.env').config();
 
@@ -13,97 +12,53 @@ const connection = mysql.createConnection({
   database: process.env.DB_DATABASE || "bamazon"
 });
 
+let dbFunctions = require('./utilities.js')(connection);
+
 connection.connect((err, res) => {
   err ? console.error(`Connection error: ${err.stack}`) : console.log(`Connected as ID: ${connection.threadId}`);
-  displayItems();
-  //getItemID();
+  dbFunctions.displayItemsTest(10, 45, 42, 10, 0, 0);
+  //setTimefunc or call back to wait displayItems() execution
+  buyItem();
 });
 
-function errorF(err) {
-  if (err) throw err;
-}
 
-function displayItems() {
-  connection.query("SELECT * FROM products", ((err, res) => {
-    errorF(err);
-    var table = new Table({
-      head: ['Item ID', 'Product', 'Department', 'Price', 'Quantity']
-      , colWidths: [10, 45, 42, 10, 10]
-      , style: { compact: true, 'padding-left': 1 }
-    });
-
-    for (let row of res) {
-      table.push([row.item_id, row.product_name, row.department_name, row.price, row.stock_quantity]);
-    }
-    console.log(table.toString());
-  })
-  )
-  getItemID()
-}
-
-function buyItem(ids) {
-  //getItemID();
+function buyItem() {
   inquirer.prompt([
     {
       name: 'itemToBuy',
-      type: 'rawlist',
+      type: 'input',
       message: "Please select the ID of the item you would like to purchase: ",
-      choices: ids,
+      //validate that product is available AND validate that there ar eenought items
     },
     {
       name: "quantityToBuy",
       type: 'input',
-      message: "Please select how many units of this item you would like to purchase.",
+      message: "Please select how many units of this item you would like to purchase: ",
     }
   ]).then(answers => {
-    var columns = ['stock_quantity', 'price', 'product_name'];
-    connection.query("SELECT ?? FROM ?? WHERE ?",
-      [columns, 'products', { item_id: answers.itemToBuy }],
-      
+    connection.query("SELECT * FROM ?? WHERE ?",
+      ['products', { item_id: answers.itemToBuy }],
       (err, res) => {
-        errorF(err);
-        res.forEach(val=>{
-        if (answers.quantityToBuy > val.stock_quantity) console.log(`Insufficient quantity!`);
-        else {
-          connection.query("UPDATE products SET ?? = -? WHERE ?",
-            ['stock_quantity', answers.quantityToBuy, { item_id: answers.itemToBuy }], (err, res) => {
-              errorF(err);
-              console.log("Sucessful update!");
-            })
-        }
-        console.log(`The total you have to pay for the ${val.product_name} is ${val.price}`);
-      })
+        dbFunctions.errorF(err);
+        res.forEach(val => {
+          if (answers.quantityToBuy > val.stock_quantity) {
+            console.log(`Insufficient quantity!`);
+            buyItem();
+          }
+          else {
+            connection.query("UPDATE products SET ?? = ??-? WHERE ?",
+              ['stock_quantity', 'stock_quantity', answers.quantityToBuy, { item_id: answers.itemToBuy }], (err, res) => {
+                dbFunctions.errorF(err);
+                console.log("Sucessful update!");
+              })
+            connection.query('UPDATE products SET ?? = ??+ (??*?) WHERE ?', ['product_sales', 'product_sales', 'price', answers.quantityToBuy, { item_id: answers.itemToBuy }],
+              (err, res) => {
+                dbFunctions.errorF(err);
+              })
+            console.log(`The total you have to pay for the ${val.product_name} is ${val.price}`);
+          }
+
+        })
       })
   })
 }
-
-
-function getItemID() {
-  connection.query("SELECT item_id FROM products", ((err, res) => {
-    errorF(err);
-    let arrayIDs = [];
-    res.forEach(val => {
-      arrayIDs.push(val.item_id);
-    })
-    buyItem(arrayIDs.map(String));
-
-  }))
-}
-
-module.exports = {
-  displayItems: displayItems,
-  getItemID: getItemID,
-  errorF:errorF
-};
-
-
-//function getItemID(){
-//connection.query("SELECT item_id FROM products", ((err, res)=>{
-//var array=res.map(val=>{
-//return{ 
-//value: val.item_id,
-//array:array,
-//}
-//})
-//}))
-//}
