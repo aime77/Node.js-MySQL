@@ -66,9 +66,8 @@ function displayMenu() {
 
 function createNewDept(newDeptName, overHeadCost) {
     connection.query('INSERT INTO ?? SET ?', ['departments', { department_name: newDeptName, over_head_costs: overHeadCost }],
-        (err, res) => {
+        (err) => {
             dbFunctions.errorF(err);
-            console.log(`Successful insertion at row ${row}`);
             displayMenu()
         })
 }

@@ -76,7 +76,7 @@ function displayMenu() {
     }).then(choice => {
         if (choice.option === Object.keys(options)[1]) viewLowInventory();
         else if (choice.option === Object.keys(options)[0]) dbFunctions.displayItemsTest(10, 45, 42, 10, 15, 10, displayMenu);
-        else if (choice.option === Object.keys(options)[0]) return false;
+        else if (choice.option === Object.keys(options)[4]) return ;
         else {
             inquirer.prompt(options[choice.option]).then(answers => {
                 switch (choice.option) {
@@ -101,7 +101,6 @@ function addToInventory(itemID, newInventoryID) {
     connection.query("UPDATE products SET ?? = ??+? WHERE ?", ['stock_quantity', 'stock_quantity', newInventoryID, { item_id: itemID }],
         (err) => {
             dbFunctions.displayItemsTest(10, 45, 42, 10, 15, 10, displayMenu);
-            connection.end();
             dbFunctions.errorF(err);
         }
     )
@@ -111,7 +110,6 @@ function addNewProduct(productName, productDept, productPrice) {
     connection.query('INSERT INTO ?? SET ?', ['products', { product_name: productName, department_name: productDept, price: productPrice }],
         (err) => {
             dbFunctions.displayItemsTest(10, 45, 42, 10, 15, 10, displayMenu);
-            connection.end();
             dbFunctions.errorF(err);
         })
 }
