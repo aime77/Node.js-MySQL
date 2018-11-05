@@ -1,3 +1,5 @@
+//require('.env').config();
+
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
@@ -14,11 +16,10 @@ const connection = mysql.createConnection({
 
 let dbFunctions = require('./utilities.js')(connection);
 
-connection.connect((err, res) => {
+connection.connect((err) => {
   err ? console.error(`Connection error: ${err.stack}`) : console.log(`Connected as ID: ${connection.threadId}`);
-  dbFunctions.displayItemsTest(10, 45, 42, 10, 0, 0);
-  //setTimefunc or call back to wait displayItems() execution
-  buyItem();
+  dbFunctions.logoCompany();
+  dbFunctions.displayItemsCustomer(10, 45, 42, 10, buyItem);
 });
 
 
@@ -28,12 +29,19 @@ function buyItem() {
       name: 'itemToBuy',
       type: 'input',
       message: "Please select the ID of the item you would like to purchase: ",
-      //validate that product is available AND validate that there ar eenought items
+      validate: function validate(val) {
+        var regex = /^[0-99]+$/;
+        if (val.match(regex)) return true;
+      }
     },
     {
       name: "quantityToBuy",
       type: 'input',
       message: "Please select how many units of this item you would like to purchase: ",
+      validate: function validate(val) {
+        var regex = /^[0-99]+$/;
+        if (val.match(regex)) return true;
+      }
     }
   ]).then(answers => {
     connection.query("SELECT * FROM ?? WHERE ?",
@@ -41,21 +49,25 @@ function buyItem() {
       (err, res) => {
         dbFunctions.errorF(err);
         res.forEach(val => {
-          if (answers.quantityToBuy > val.stock_quantity) {
+          if (val.stock_quantity <= 0) {
+            console.log('Out of stock! Try a different item.');
+            buyItem();
+          }
+          else if (answers.quantityToBuy > val.stock_quantity) {
             console.log(`Insufficient quantity!`);
             buyItem();
           }
           else {
             connection.query("UPDATE products SET ?? = ??-? WHERE ?",
-              ['stock_quantity', 'stock_quantity', answers.quantityToBuy, { item_id: answers.itemToBuy }], (err, res) => {
+              ['stock_quantity', 'stock_quantity', answers.quantityToBuy, { item_id: answers.itemToBuy }], (err) => {
                 dbFunctions.errorF(err);
-                console.log("Sucessful update!");
               })
             connection.query('UPDATE products SET ?? = ??+ (??*?) WHERE ?', ['product_sales', 'product_sales', 'price', answers.quantityToBuy, { item_id: answers.itemToBuy }],
-              (err, res) => {
+              (err) => {
+                connection.destroy();
                 dbFunctions.errorF(err);
               })
-            console.log(`The total you have to pay for the ${val.product_name} is ${val.price}`);
+            console.log(`The total you have to pay for the ${val.product_name} is ${val.price * answers.quantityToBuy}`);
           }
 
         })

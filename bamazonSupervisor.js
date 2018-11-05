@@ -1,3 +1,5 @@
+//require('dotenv').config();
+
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 //const bcrypt = require("bcrypt");
@@ -14,12 +16,13 @@ let dbFunctions = require('./utilities.js')(connection);
 
 connection.connect((err, res) => {
     err ? console.error(`Connection error: ${err.stack}`) : console.log(`Connected as ID: ${connection.threadId}`);
+    dbFunctions.logoCompany();
     displayMenu();
 });
 
 let options = {
     " View Products Sales by Dept": {},
-    //IMPORTANT: create function to add roduct and dept
+    //IMPORTANT: create function to add product and dept
     " Create New Department": [{
         type: "input",
         message: "Please enter the name of the department you would like to add: ",
@@ -48,21 +51,24 @@ function displayMenu() {
         message: 'Please select an option: ',
         choices: Object.keys(options),
     }).then(choice => {
-        if (choice.option === Object.keys(options)[0]) dbFunctions.displayTableSupervisor();
-        else if (choice.option === Object.keys(options)[2]) return false;
-        else {
+        if (choice.option === Object.keys(options)[0]) dbFunctions.displayTableSupervisor(displayMenu);
+        else if (choice.option === Object.keys(options)[2]) {
+            connection.end();
+            return false;
+        } else {
             inquirer.prompt(options[choice.option]).then(answers => {
-                if (choice.option === Object.keys(options)[1]) createNewDepartment(answers['newDeptName'], answers['overHeadCost']);
+                if (choice.option === Object.keys(options)[1]) createNewDept(answers['newDeptName'], answers['overHeadCost']);
             })
         }
     })
 }
 
 
-function createNewDept() {
-    connection.query('INSERT INTO ?? SET ?', ['products', { product_name: productName, department_name: productDept, price: productPrice }],
-    (err, res) => {
-        dbFunctions.errorF(err);
-        console.log(`Successful insertion at row ${connection.affectedRow}`);
-    })
+function createNewDept(newDeptName, overHeadCost) {
+    connection.query('INSERT INTO ?? SET ?', ['departments', { department_name: newDeptName, over_head_costs: overHeadCost }],
+        (err, res) => {
+            dbFunctions.errorF(err);
+            console.log(`Successful insertion at row ${row}`);
+            displayMenu()
+        })
 }

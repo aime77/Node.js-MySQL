@@ -1,3 +1,5 @@
+//require('.env').config();
+
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 //const bcrypt = require("bcrypt");
@@ -14,6 +16,7 @@ let dbFunctions = require('./utilities.js')(connection);
 
 connection.connect((err, res) => {
     err ? console.error(`Connection error: ${err.stack}`) : console.log(`Connected as ID: ${connection.threadId}`);
+    dbFunctions.logoCompany();
     displayMenu();
 });
 
@@ -71,46 +74,44 @@ function displayMenu() {
         message: 'Please select an option: ',
         choices: Object.keys(options)
     }).then(choice => {
-        if(choice.option=== Object.keys(options)[1]) viewLowInventory();
-        else if (choice.option===Object.keys(options)[0]) dbFunctions.displayItemsTest(10, 45, 42, 10, 10, 10);
-                else{
-        inquirer.prompt(options[choice.option]).then(answers => {
-            switch (choice.option) {
-                case Object.keys(options)[2]:
-                    addToInventory(answers['getItemID'], answers['newInventoryNo']);
-                    break;
+        if (choice.option === Object.keys(options)[1]) viewLowInventory();
+        else if (choice.option === Object.keys(options)[0]) dbFunctions.displayItemsTest(10, 45, 42, 10, 15, 10, displayMenu);
+        else if (choice.option === Object.keys(options)[0]) return false;
+        else {
+            inquirer.prompt(options[choice.option]).then(answers => {
+                switch (choice.option) {
+                    case Object.keys(options)[2]:
+                        addToInventory(answers['getItemID'], answers['newInventoryNo']);
+                        break;
 
-                case Object.keys(options)[3]:
-                    addNewProduct(answers['newItemName'], answers['newItemDept'], answers['newItemPrice']);
-                    break;
-            }
-        })
-    }
+                    case Object.keys(options)[3]:
+                        addNewProduct(answers['newItemName'], answers['newItemDept'], answers['newItemPrice']);
+                        break;
+                }
+            })
+        }
     })
 }
 
 function viewLowInventory() {
-    connection.query(`SELECT stock_quantity FROM products WHERE stock_quantity<6 GROUP BY product_name`, (err, res) => {
-        dbFunctions.errorF(err);
-        //IMPORTANT:Make table to display results
-        console.log(res);
-    })
+    dbFunctions.tableOutOfStock(10, 45, 42, 10, 15, 10, displayMenu);
 }
 
 function addToInventory(itemID, newInventoryID) {
     connection.query("UPDATE products SET ?? = ??+? WHERE ?", ['stock_quantity', 'stock_quantity', newInventoryID, { item_id: itemID }],
-        (err, res) => {
+        (err) => {
+            dbFunctions.displayItemsTest(10, 45, 42, 10, 15, 10, displayMenu);
+            connection.end();
             dbFunctions.errorF(err);
-            //IMPORTANT:create general function to display succesful update
-            console.log(`Succesful update at row ${connection.affectedRow}`)
         }
     )
-} 
+}
 //IMPORTANT: Create constructor for new products
 function addNewProduct(productName, productDept, productPrice) {
     connection.query('INSERT INTO ?? SET ?', ['products', { product_name: productName, department_name: productDept, price: productPrice }],
-        (err, res) => {
+        (err) => {
+            dbFunctions.displayItemsTest(10, 45, 42, 10, 15, 10, displayMenu);
+            connection.end();
             dbFunctions.errorF(err);
-            console.log(`Successful insertion at row ${connection.affectedRow}`);
         })
 }
