@@ -1,0 +1,27 @@
+{
+  "name": "node.js-mysql",
+  "version": "1.0.0",
+  "description": "Amazon-like storefront app. The app takes in orders from customers and deplete stock from the store's inventory.",
+  "main": "Product.js",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "cli-table": "^0.3.1",
+    "dotenv": "^6.2.0",
+    "inquirer": "^6.2.0",
+    "mysql": "^2.16.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aime77/Node.js-MySQL.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aime77/Node.js-MySQL/issues"
+  },
+  "homepage": "https://github.com/aime77/Node.js-MySQL#readme"
+}

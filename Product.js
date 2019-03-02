@@ -7,5 +7,3 @@ this.stock_quantity=stock_quantity ||null;
 }
 
 module.exports=NewProduct;
-
-//let table=new Table()
