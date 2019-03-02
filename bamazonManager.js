@@ -1,5 +1,3 @@
-require('.env').config();
-
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 

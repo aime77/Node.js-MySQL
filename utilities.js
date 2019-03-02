@@ -2,11 +2,9 @@ const Table = require("cli-table");
 
 module.exports = function(connection) {
   return {
-    //IMPORTANT:expand on error function
     errorF: function errorF(err) {
       if (err) console.error(`Error connecting ${err.stack}`);
     },
-    //IMPORTANT: Imrove layout of tables
     displayItemsTest: function displayItemsTest(a, b, c, d, e, f, cb) {
       connection.query("SELECT * FROM products", (err, res) => {
         this.errorF(err);
@@ -19,7 +17,7 @@ module.exports = function(connection) {
             `Inventory`,
             `Sales`
           ],
-          colWidths: [a, b, c, d, e, f], //10, 45, 42, 10, 10, 10
+          colWidths: [a, b, c, d, e, f], 
           style: { "padding-left": 1 }
         });
 
@@ -52,7 +50,7 @@ module.exports = function(connection) {
         return arrayIDs;
       });
     },
-    //IMPORTANT: Validate NULL values in table
+  
     displayTableSupervisor: function displayTableSupervisor(cb) {
       var select =
         "SELECT department_id, departments.department_name, over_head_costs, SUM(product_sales) as sales, SUM(over_head_costs-products.product_sales) AS total_profit FROM departments LEFT JOIN products USING (department_name) GROUP BY department_name";

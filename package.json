@@ -2,7 +2,7 @@
   "name": "node.js-mysql",
   "version": "1.0.0",
   "description": "Amazon-like storefront app. The app takes in orders from customers and deplete stock from the store's inventory.",
-  "main": "Product.js",
+  "main": "bamazonCustomer.js",
   "dependencies": {
     "chalk": "^2.4.1",
     "cli-table": "^0.3.1",

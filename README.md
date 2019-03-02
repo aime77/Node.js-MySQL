@@ -3,9 +3,9 @@ Amazon-like storefront app. The app takes in orders from customers and deplete s
 
 ## Dependencies<h2>
 * MySQL
-* dotenv
+* Express
+* Node
 * Inquirer
-* cli-table
 
 ## Database Structure<h2>
 Customer menu with the following options:
@@ -22,4 +22,4 @@ Supervisor menu with the following options:
 * Option 2 -Allows supervidor to add a depatment
 
 ## Link to app <h2>
-* Click on the following link for a video of the typical user flow through this application: https://we.tl/t-KduX9I81Me
+* Click on the following link for a video of the typical user flow through this application: https://youtu.be/1GF3IYAbe60
